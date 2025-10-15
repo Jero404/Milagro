@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milagro - Productos de crochet</title>
+  <style>
+    :root {
+      --lavanda: #B497BD;
+      --rosa: #F7D9E3;
+      --menta: #CFE7DC;
+      --blanco: #FFF9FB;
+      --gris-lavanda: #6D597A;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--blanco);
+      color: var(--gris-lavanda);
+    }
+
+    header {
+      background-color: var(--lavanda);
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1rem 0;
+    }
+
+    nav a {
+      color: var(--gris-lavanda);
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .productos {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    .card {
+      background-color: var(--rosa);
+      border-radius: 1rem;
+      padding: 1rem;
+      width: 250px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .d-none {
+      display: none;
+    }
+    .card img {
+      width: 100%;
+      border-radius: 0.5rem;
+    }
+
+    .boton {
+      margin-top: 1rem;
+      background-color: var(--lavanda);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    footer {
+      background-color: var(--gris-lavanda);
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="assets/img/Milagro.png"  alt="Milagro Logo" style="width: 300px;"> 
+    <p>Creaciones hechas a mano con amor</p>
+  </header>
+
+  <nav>
+    <a href="#">Inicio</a>
+    <a href="#">¿Quiénes somos?</a>
+    <a href="#">Productos</a>
+    <a href="#">Contáctanos</a>
+  </nav>
+
+  <section class="productos">
+      <div class="card">
+        <img src="assets/img/productos/bolso lila-gris.jpg" alt="Producto 1">
+        <h3>Bolso Milagro - Lavanda y chocolate </h3>
+        <button class="boton" onclick="document.getElementById('desc-1').classList.toggle('d-none')">Ver descripción</button>
+        <p id="desc-1" class="d-none">
+       28cm de ancho x 24cm  de alto y 1,34m de alto con el asa extendida<br><br>
+Este elegante bolso artesanal destaca por su fusión de colores suaves y profundos: lavanda al centro y chocolate en los laterales, creando un contraste sofisticado y armonioso. El detalle central de mariposa con brillo y la correa con eslabones dorados le añaden un aire delicado y femenino, perfecto para ocasiones especiales o para darle un toque chic a tu día a día.<br><br>
+Su cuerpo tejido a mano en técnica de crochet garantiza firmeza, textura única y gran estilo. Ideal para mujeres que buscan un accesorio versátil, con encanto y elaborado con dedicación.<br><br>
+✋ Hecho a mano con cuidado y precisión<br>
+✅ Comodidad, estilo y durabilidad en una sola pieza<br><br>
+Un bolso que mezcla ternura, elegancia y originalidad en cada detalle.</p>
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <img src="assets/img/productos/organizador.jpg" alt="Producto 2">
+      <h3>Canasto Organizador Milagro – Modelo Rosa Pastel con Moño Decorativo</h3>
+         <button class="boton" onclick="document.getElementById('desc-2').classList.toggle('d-none')">Ver descripción</button>
+        <p id="desc-2" class="d-none">
+       41cm de ancho x 15 cm de fondo x 10 cm de alto.<br><br>
+Este delicado y funcional canasto organizador es ideal para dar un toque tierno y ordenado a tus espacios. Tejido completamente a mano en tonos suaves como rosa pastel, gris y blanco, combina belleza y utilidad en un solo diseño.<br><br>
+Es perfecto para organizar papel higiénico, pañales, toallas pequeñas o artículos de tocador, especialmente en baños, habitaciones infantiles o tocadores. Su moño decorativo estampado en rosado añade un detalle encantador y femenino que no pasa desapercibido.<br><br>
+✋ Elaboración 100% artesanal<br>
+✅ Fácil de lavar y mantener en excelente estado<br><br>
+Un detalle lleno de encanto para espacios que merecen suavidad y estilo.</p>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Milagro - Todos los derechos reservados</p>
+  </footer>
+</body>
+</html>

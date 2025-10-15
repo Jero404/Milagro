@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Milagro</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="assets/img/minilogo.png" rel="icon">
+  <link href="assets/img/minilogo.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: Active
+  * Template URL: https://bootstrapmade.com/active-bootstrap-website-template/
+  * Updated: Aug 07 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="cards-page">
+
+  <header id="header" class="header d-flex align-items-center sticky-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+      <a href="index.html" class="logo d-flex align-items-center">
+        <!-- Uncomment the line below if you also wish to use an image logo -->
+        <!-- <img src="assets/img/minilogo.png" alt=""> -->
+      <img src="assets/img/Milagro.png"  alt="Milagro Logo" class="logo-img"> 
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="index.html" class="active">Inicio</a></li>
+          <li><a href="about.html">¿Que somos?</a></li>
+          <li><a href="services.html">Productos</a></li>
+          <li><a href="contact.html">Contactanos</a></li>
+        </ul>
+      </nav>
+
+    </div>
+  </header>
+
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Generador de banners</h1>
+            <p>Crea los banners de los productos y sus descripciones que se pueden mostrar/ocultar</p>
+        </header>
+        
+        <div class="controls">
+            <div class="form-group">
+                <label for="imageUpload">Seleccionar imagen local:</label>
+                <div class="file-input-container">
+                    <input type="file" id="imageUpload" class="file-input" accept="image/*" aria-label="Seleccionar imagen local">
+                    <label for="imageUpload" class="file-input-label">Elegir imagen</label>
+                </div>
+                <img id="imagePreview" class="image-preview" alt="Vista previa" style="display:none;max-width:100%;height:auto;">
+            </div>
+            <div class="form-group">
+                <label for="cardTitle">Título de la card:</label>
+                <input type="text" id="cardTitle" placeholder="Ingresa un título" aria-label="Título de la card">
+            </div>
+            <div class="form-group">
+                <label for="cardText">Texto de la card (con saltos de línea):</label>
+                <textarea id="cardText" placeholder="Ingresa el texto descriptivo. Usa &lt;br&gt; para saltos de línea" aria-label="Texto de la card"></textarea>
+            </div>
+            <div id="formErrorMsg" style="color:red;display:none;margin-bottom:10px;"></div>
+            <div class="button-group">
+                <button class="btn-generate" onclick="generateCard()">Generar Card</button>
+                <button class="btn-clear" onclick="clearAllCards()">Limpiar Todo</button>
+            </div>
+        </div>
+        
+        <div id="cardsContainer" class="cards-container">
+            <div class="empty-state">
+                <h3>No hay cards aún</h3>
+                <p>Agrega tu primera card usando el formulario superior</p>
+            </div>
+        </div>
+    </div>
+
+
+  <footer id="footer" class="footer light-background">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3 mb-3 mb-md-0">
+          <div class="widget">
+            <h3 class="widget-heading">Milagro</h3>
+            <p class="mb-4">
+Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera fresca y unica con diseños exclusivos,que daran una unica e innovadora a cualquier ambientede tu hogar.
+            </p>
+            <p class="mb-0">
+              <a href="about.html" class="btn-learn-more">Nosotros</a>
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3 ps-lg-5 mb-3 mb-md-0">
+          <div class="widget">
+            <h3 class="widget-heading">Navigation</h3>
+            <ul class="list-unstyled float-start me-5">
+              <li><a href="index.html">Inicio</a></li>
+              <li><a href="about.html">sobre nosotros</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3 pl-lg-5">
+          <div class="widget">
+            <h3 class="widget-heading">Contactanos</h3>
+            <ul class="list-unstyled social-icons light mb-3">
+              <li>
+                <a href="#"><span class="bi bi-facebook"></span></a>
+              </li>
+              <li>
+                <a href="https://www.instagram.com/mila.groofficial/"><span class="bi bi-instagram"></span></a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="widget">
+            <div class="footer-subscribe">
+              <h3 class="widget-heading">Subscribe</h3>
+              <form action="forms/newsletter.php" method="post" class="php-email-form">
+                <div class="mb-2">
+                  <input type="text" class="form-control" name="email" placeholder="Enter your email">
+
+                  <button type="submit" class="btn btn-link">
+                    <span class="bi bi-arrow-right"></span>
+                  </button>
+                </div>
+                <div class="loading">Loading</div>
+                <div class="error-message"></div>
+                <div class="sent-message">
+                  Your subscription request has been sent. Thank you!
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="copyright d-flex flex-column flex-md-row align-items-center justify-content-md-between">
+        <p>© <span>Copyright</span> <strong class="px-1 sitename">Milagro.</strong> <span>All Rights Reserved</span></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+
+  <!-- Main JS File -->
+  <!-- Lógica de creación de cards para bbbbb.html -->
+  <script>
+    let selectedImageUrl = null;
+  let cardCounter = 0;
+  let editingCardId = null;
+
+    // Protección de acceso: solo usuario logueado
+    if (localStorage.getItem('milagro_logged') !== 'true') {
+      window.location.href = 'login.html';
+      return;
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+  // Eliminar duplicados en localStorage al cargar
+  function removeAllDuplicatesLS(tipo) {
+    let cards = JSON.parse(localStorage.getItem('cards_' + tipo) || '[]');
+    const uniqueCards = [];
+    const ids = new Set();
+    cards.forEach(card => {
+      if (!ids.has(card.id)) {
+        uniqueCards.push(card);
+        ids.add(card.id);
+      }
+    });
+    localStorage.setItem('cards_' + tipo, JSON.stringify(uniqueCards));
+  }
+  removeAllDuplicatesLS('bolsos');
+  removeAllDuplicatesLS('canastas');
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'cards_bolsos' || e.key === 'cards_canastas') {
+      renderStoredCards();
+    }
+  });
+  // Renderizar cards guardadas en localStorage al cargar
+  function renderStoredCards() {
+    const container = document.getElementById('cardsContainer');
+    // Eliminar cards existentes
+    container.querySelectorAll('.card').forEach(card => card.remove());
+    // Renderizar cards de bolsos
+    let cardsBolsos = JSON.parse(localStorage.getItem('cards_bolsos') || '[]');
+    cardsBolsos.forEach(card => {
+      window.createCardElement(card.img, card.titulo, card.desc, card.id);
+    });
+    // Renderizar cards de canastas
+    let cardsCanastas = JSON.parse(localStorage.getItem('cards_canastas') || '[]');
+    cardsCanastas.forEach(card => {
+      window.createCardElement(card.img, card.titulo, card.desc, card.id);
+    });
+  }
+  renderStoredCards();
+      document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
+      const preloader = document.getElementById('preloader');
+      if (preloader) preloader.style.display = 'none';
+    });
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (!file.type.match('image.*')) {
+        alert('Por favor, selecciona solo archivos de imagen.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedImageUrl = e.target.result;
+        const preview = document.getElementById('imagePreview');
+        preview.src = selectedImageUrl;
+        preview.style.display = 'block';
+        preview.alt = 'Vista previa de la imagen';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    window.generateCard = function() {
+      const title = document.getElementById('cardTitle').value.trim();
+      const text = document.getElementById('cardText').value.trim();
+      const image = selectedImageUrl;
+      const errorMsg = document.getElementById('formErrorMsg');
+      if (!title || !text || !image) {
+        errorMsg.textContent = 'Por favor, completa todos los campos y selecciona una imagen.';
+        errorMsg.style.display = 'block';
+        return;
+      } else {
+        errorMsg.style.display = 'none';
+      }
+      const emptyState = document.querySelector('.empty-state');
+      if (emptyState) emptyState.style.display = 'none';
+      // Si está editando, actualizar la card
+      if (editingCardId !== null) {
+        const card = document.querySelector(`.card[data-card-id='${editingCardId}']`);
+        if (card) {
+          card.querySelector('img').src = image;
+          card.querySelector('.card-title').textContent = title;
+          card.querySelector('.card-desc').innerHTML = formatDescription(text);
+        }
+        // Actualizar en localStorage usando id único
+        let tipo = '';
+        if (/bolso|bolsos/i.test(title)) {
+          tipo = 'bolsos';
+        } else if (/canasta|canastas/i.test(title)) {
+          tipo = 'canastas';
+        }
+        if (tipo) {
+          let cards = JSON.parse(localStorage.getItem('cards_' + tipo) || '[]');
+          const idx = cards.findIndex(c => c.id === editingCardId);
+          if (idx !== -1) {
+            cards[idx] = { id: editingCardId, img: image, titulo: title, desc: text };
+            localStorage.setItem('cards_' + tipo, JSON.stringify(cards));
+          }
+        }
+        editingCardId = null;
+        document.querySelector('.btn-generate').textContent = 'Generar Card';
+        resetForm();
+        return;
+      }
+      // Si no está editando, crear nueva card
+      const cardId = 'card-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+      cardCounter++;
+      createCardElement(selectedImageUrl, title, text, cardId);
+      // Guardar la card en localStorage según el tipo
+      let tipo = '';
+      if (/bolso|bolsos/i.test(title)) {
+        tipo = 'bolsos';
+      } else if (/canasta|canastas/i.test(title)) {
+        tipo = 'canastas';
+      }
+      if (tipo) {
+        const nuevaCard = {
+          id: cardId,
+          img: selectedImageUrl,
+          titulo: title,
+          desc: text
+        };
+        let cards = JSON.parse(localStorage.getItem('cards_' + tipo) || '[]');
+        cards.push(nuevaCard);
+        localStorage.setItem('cards_' + tipo, JSON.stringify(cards));
+          // Renderizar cards después de guardar
+          renderStoredCards();
+      }
+      resetForm();
+    }
+
+    window.createCardElement = function(imageUrl, title, text, id) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${imageUrl}" alt="${title}" class="card-image">
+        <div class="card-content">
+          <h3 class="card-title">${title}</h3>
+          <button class="boton" onclick="document.getElementById('desc-${id}').classList.toggle('d-none')">Ver descripción</button>
+          <button class="boton btn-editar" onclick="window.editCard('${id}')">Editar</button>
+          <button class="boton btn-delete" onclick="window.deleteCard('${id}')" title="Eliminar"><i class="bi bi-trash" style="font-size:1.2em;color:#d9534f;"></i></button>
+          <div id="desc-${id}" class="card-desc d-none">
+            ${formatDescription(text)}
+          </div>
+        </div>
+      `;
+    window.deleteCard = function(cardId) {
+      if (!confirm('¿Seguro que quieres eliminar esta card?')) return;
+      // Eliminar del DOM
+      const cardElem = document.querySelector(`.card[data-card-id='${cardId}']`);
+      if (cardElem) cardElem.remove();
+      // Eliminar de localStorage
+      // Buscar tipo y eliminar en ambos localStorage
+      let tipos = ['bolsos', 'canastas'];
+      tipos.forEach(function(tipo) {
+        let cards = JSON.parse(localStorage.getItem('cards_' + tipo) || '[]');
+        // Eliminar todos los duplicados con el mismo id
+        cards = cards.filter((c, idx, arr) => c.id !== cardId || arr.findIndex(x => x.id === c.id) !== idx);
+        // Además, eliminar todos los que tengan ese id
+        cards = cards.filter(c => c.id !== cardId);
+        localStorage.setItem('cards_' + tipo, JSON.stringify(cards));
+      });
+    }
+      card.setAttribute('data-card-id', id);
+      document.getElementById('cardsContainer').appendChild(card);
+    // Variables para edición
+    let editingCardId = null;
+
+    window.editCard = function(cardId) {
+  // Buscar la card en el DOM
+  const card = document.querySelector(`.card[data-card-id='${cardId}']`);
+  if (!card) return;
+  // Obtener datos actuales
+  const img = card.querySelector('img').src;
+  const title = card.querySelector('.card-title').textContent;
+  const desc = card.querySelector('.card-desc').innerHTML.replace(/<br>/g, '\n');
+  // Cargar en formulario
+  document.getElementById('cardTitle').value = title;
+  document.getElementById('cardText').value = desc;
+  document.getElementById('imagePreview').src = img;
+  document.getElementById('imagePreview').style.display = 'block';
+  selectedImageUrl = img;
+  editingCardId = cardId;
+  // Cambiar texto del botón
+  document.querySelector('.btn-generate').textContent = 'Guardar Cambios';
+    }
+
+    // Eliminar duplicada y unificar lógica de window.generateCard
+    }
+
+    function formatDescription(text) {
+      return text.replace(/<br>/g, '<br>');
+    }
+
+    window.clearAllCards = function() {
+      if (!confirm('¿Estás seguro de que quieres eliminar todas las cards?')) return;
+      const container = document.getElementById('cardsContainer');
+      container.innerHTML = `
+        <div class="empty-state">
+          <h3>No hay cards aún</h3>
+          <p>Agrega tu primera card usando el formulario superior</p>
+        </div>
+      `;
+      cardCounter = 0;
+      document.getElementById('formErrorMsg').style.display = 'none';
+    }
+
+    function resetForm() {
+      document.getElementById('cardTitle').value = '';
+      document.getElementById('cardText').value = '';
+      document.getElementById('imageUpload').value = '';
+      const preview = document.getElementById('imagePreview');
+      preview.src = '';
+      preview.style.display = 'none';
+      selectedImageUrl = null;
+    }
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const preloader = document.getElementById('preloader');
+      if (preloader) preloader.style.display = 'none';
+    });
+  </script>
+    
+</body>
+
+</html>
