@@ -62,8 +62,12 @@
   </header>
 
 </head>
-
-<body>
+<div class="container">
+    <header>
+        <h1>Generador de banners</h1>
+        <p>Crea los banners de los productos y sus descripciones que se pueden mostrar/ocultar</p>
+    </header>
+    
     <div class="controls">
         <div class="form-group">
             <label for="imageUpload">Seleccionar imagen local:</label>
@@ -83,12 +87,22 @@
             <label for="cardText">Texto de la card (con saltos de línea):</label>
             <textarea id="cardText" placeholder="Ingresa el texto descriptivo. Usa &lt;br&gt; para saltos de línea" aria-label="Texto de la card" rows="4"></textarea>
         </div>
+
+        <div class="form-group">
+            <label for="cardCategory">Categoría:</label>
+            <select id="cardCategory" aria-label="Categoría de la card">
+                <option value="bolsos">Bolsos</option>
+                <option value="canastas">Canastas</option>
+                <option value="otros">Otros</option>
+            </select>
+        </div>
         
         <div id="formErrorMsg" class="error-message" style="display:none;"></div>
         
         <div class="button-group">
             <button class="btn-generate" onclick="generateCard()">Generar Card</button>
             <button class="btn-clear" onclick="clearAllCards()">Limpiar Todo</button>
+            <button class="btn-view" onclick="viewCategories()">Ver Categorías</button>
         </div>
     </div>
     
@@ -109,6 +123,18 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSavedCards();
 });
 
+// Función para determinar categoría basada en título (alternativa automática)
+function detectCategory(title) {
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes('bolso') || titleLower.includes('cartera') || titleLower.includes('mochila')) {
+        return 'bolsos';
+    } else if (titleLower.includes('canasta') || titleLower.includes('cesta') || titleLower.includes('canastro')) {
+        return 'canastas';
+    } else {
+        return 'otros';
+    }
+}
+
 // Función para guardar cards en localStorage
 function saveCardsToStorage() {
     const cards = [];
@@ -116,7 +142,8 @@ function saveCardsToStorage() {
         const cardData = {
             title: card.querySelector('.card-title').textContent,
             text: card.querySelector('.card-text').innerHTML,
-            image: card.querySelector('.card-image') ? card.querySelector('.card-image').src : null
+            image: card.querySelector('.card-image') ? card.querySelector('.card-image').src : null,
+            category: card.dataset.category
         };
         cards.push(cardData);
     });
@@ -146,11 +173,16 @@ function loadSavedCards() {
 function createCardElement(cardData) {
     const card = document.createElement('div');
     card.className = 'card';
+    card.dataset.category = cardData.category;
     card.innerHTML = `
         ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title}" class="card-image">` : ''}
         <h3 class="card-title">${cardData.title}</h3>
+        <div class="card-category">Categoría: ${cardData.category}</div>
         <div class="card-text">${cardData.text}</div>
-        <button class="btn-delete" onclick="deleteCard(this)">Eliminar</button>
+        <div class="card-actions">
+            <button class="btn-delete" onclick="deleteCard(this)">Eliminar</button>
+            <button class="btn-view-page" onclick="viewInCategory('${cardData.category}')">Ver en ${cardData.category}</button>
+        </div>
     `;
     return card;
 }
@@ -158,6 +190,7 @@ function createCardElement(cardData) {
 function generateCard() {
     const title = document.getElementById('cardTitle').value.trim();
     const text = document.getElementById('cardText').value.trim();
+    const category = document.getElementById('cardCategory').value;
     const imagePreview = document.getElementById('imagePreview');
     const errorMsg = document.getElementById('formErrorMsg');
     
@@ -174,7 +207,8 @@ function generateCard() {
     const cardData = {
         title: title,
         text: text.replace(/\n/g, '<br>'),
-        image: imagePreview.style.display !== 'none' ? imagePreview.src : null
+        image: imagePreview.style.display !== 'none' ? imagePreview.src : null,
+        category: category
     };
     
     // Crear y agregar card
@@ -193,7 +227,7 @@ function generateCard() {
 }
 
 function deleteCard(button) {
-    const card = button.parentElement;
+    const card = button.parentElement.parentElement;
     card.remove();
     
     // Actualizar localStorage
@@ -217,6 +251,25 @@ function clearAllCards() {
         localStorage.removeItem(STORAGE_KEY);
         clearForm();
     }
+}
+
+function viewInCategory(category) {
+    // Guardar la categoría que queremos ver
+    localStorage.setItem('currentCategory', category);
+    
+    // Redirigir a la página de la categoría
+    if (category === 'bolsos') {
+        window.open('bolsos.html', '_blank');
+    } else if (category === 'canastas') {
+        window.open('canastas.html', '_blank');
+    } else {
+        window.open('otros.html', '_blank');
+    }
+}
+
+function viewCategories() {
+    // Redirigir a una página que muestre todas las categorías
+    window.open('categorias.html', '_blank');
 }
 
 function checkEmptyState() {
@@ -265,8 +318,6 @@ document.getElementById('imageUpload').addEventListener('change', function(e) {
     }
 });
 </script>
-
-
 <style>
 .error-message {
     color: red;

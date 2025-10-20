@@ -59,9 +59,32 @@
     </div>
   </header>
 
-  
-
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedCards = localStorage.getItem('savedCards');
+            const container = document.getElementById('categoryContainer');
+            
+            if (savedCards) {
+                const cards = JSON.parse(savedCards);
+                const categoryCards = cards.filter(card => card.category === 'canastas');
+                
+                if (categoryCards.length > 0) {
+                    container.innerHTML = '';
+                    
+                    categoryCards.forEach(cardData => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title}" class="card-image">` : ''}
+                            <h3>${cardData.title}</h3>
+                            <div>${cardData.text}</div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+            }
+        });
+</script>
   <section class="productos">
     <div class="productos-row">
       <div class="card">
@@ -105,49 +128,6 @@
       </div>
     </div>
   </section>
-<script>
-function renderCards() {
-  const row = document.querySelector('.productos-row');
-  let cards = JSON.parse(localStorage.getItem('cards_canastas') || '[]');
-  // Filtrar duplicados por id
-  const cardMap = new Map();
-  cards.forEach((prod) => {
-    if (prod.id) {
-      cardMap.set(prod.id, prod);
-    }
-  });
-  Array.from(cardMap.values()).forEach((prod) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.setAttribute('data-card-id', prod.id || '');
-    const descId = prod.id ? `desc-custom-${prod.id}` : `desc-custom-${Math.random()}`;
-    card.innerHTML = `
-      <img src="${prod.img}" alt="Card personalizada">
-      <h3>${prod.titulo}</h3>
-      <button class="boton btn-expand-card" data-target="${descId}">Ver descripción</button>
-      <p id="${descId}" class="d-none card-desc">${prod.desc.replace(/<br>/g, '<br>')}</p>
-    `;
-    row.appendChild(card);
-  });
-}
-document.addEventListener('DOMContentLoaded', function() {
-  window.addEventListener('storage', function(e) {
-    if (e.key === 'cards_canastas') {
-      renderCards();
-    }
-  });
-  renderCards();
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('btn-expand-card')) {
-      var card = e.target.closest('.card');
-      var descId = e.target.getAttribute('data-target');
-      var desc = document.getElementById(descId);
-      desc.classList.toggle('d-none');
-      card.classList.toggle('card-expandida');
-    }
-  });
-});
-</script>
 
  <footer id="footer" class="footer light-background">
     <div class="container">
