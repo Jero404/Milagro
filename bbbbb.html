@@ -64,43 +64,134 @@
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <h1>Generador de banners</h1>
-            <p>Crea los banners de los productos y sus descripciones que se pueden mostrar/ocultar</p>
-        </header>
-        
-        <div class="controls">
-            <div class="form-group">
-                <label for="imageUpload">Seleccionar imagen local:</label>
-                <div class="file-input-container">
-                    <input type="file" id="imageUpload" class="file-input" accept="image/*" aria-label="Seleccionar imagen local">
-                    <label for="imageUpload" class="file-input-label">Elegir imagen</label>
-                </div>
-                <img id="imagePreview" class="image-preview" alt="Vista previa" style="display:none;max-width:100%;height:auto;">
+<div class="container">
+    <header>
+        <h1>Generador de banners</h1>
+        <p>Crea los banners de los productos y sus descripciones que se pueden mostrar/ocultar</p>
+    </header>
+    
+    <div class="controls">
+        <div class="form-group">
+            <label for="imageUpload">Seleccionar imagen local:</label>
+            <div class="file-input-container">
+                <input type="file" id="imageUpload" class="file-input" accept="image/*" aria-label="Seleccionar imagen local">
+                <label for="imageUpload" class="file-input-label">Elegir imagen</label>
             </div>
-            <div class="form-group">
-                <label for="cardTitle">Título de la card:</label>
-                <input type="text" id="cardTitle" placeholder="Ingresa un título" aria-label="Título de la card">
-            </div>
-            <div class="form-group">
-                <label for="cardText">Texto de la card (con saltos de línea):</label>
-                <textarea id="cardText" placeholder="Ingresa el texto descriptivo. Usa &lt;br&gt; para saltos de línea" aria-label="Texto de la card"></textarea>
-            </div>
-            <div id="formErrorMsg" style="color:red;display:none;margin-bottom:10px;"></div>
-            <div class="button-group">
-                <button class="btn-generate" onclick="generateCard()">Generar Card</button>
-                <button class="btn-clear" onclick="clearAllCards()">Limpiar Todo</button>
-            </div>
+            <img id="imagePreview" class="image-preview" alt="Vista previa" style="display:none;max-width:100%;height:auto;">
         </div>
         
-        <div id="cardsContainer" class="cards-container">
-            <div class="empty-state">
-                <h3>No hay cards aún</h3>
-                <p>Agrega tu primera card usando el formulario superior</p>
-            </div>
+        <div class="form-group">
+            <label for="cardTitle">Título de la card:</label>
+            <input type="text" id="cardTitle" placeholder="Ingresa un título" aria-label="Título de la card">
+        </div>
+        
+        <div class="form-group">
+            <label for="cardText">Texto de la card (con saltos de línea):</label>
+            <textarea id="cardText" placeholder="Ingresa el texto descriptivo. Usa &lt;br&gt; para saltos de línea" aria-label="Texto de la card" rows="4"></textarea>
+        </div>
+        
+        <div id="formErrorMsg" class="error-message" style="display:none;"></div>
+        
+        <div class="button-group">
+            <button class="btn-generate" onclick="generateCard()">Generar Card</button>
+            <button class="btn-clear" onclick="clearAllCards()">Limpiar Todo</button>
         </div>
     </div>
+    
+    <div id="cardsContainer" class="cards-container">
+        <div class="empty-state">
+            <h3>No hay cards aún</h3>
+            <p>Agrega tu primera card usando el formulario superior</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funciones JavaScript necesarias
+function generateCard() {
+    const title = document.getElementById('cardTitle').value.trim();
+    const text = document.getElementById('cardText').value.trim();
+    const imagePreview = document.getElementById('imagePreview');
+    const errorMsg = document.getElementById('formErrorMsg');
+    
+    // Validación
+    if (!title || !text) {
+        errorMsg.textContent = 'Por favor, completa título y texto';
+        errorMsg.style.display = 'block';
+        return;
+    }
+    
+    errorMsg.style.display = 'none';
+    
+    // Crear card
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+        ${imagePreview.style.display !== 'none' ? `<img src="${imagePreview.src}" alt="${title}" class="card-image">` : ''}
+        <h3 class="card-title">${title}</h3>
+        <div class="card-text">${text.replace(/\n/g, '<br>')}</div>
+        <button class="btn-delete" onclick="this.parentElement.remove(); checkEmptyState()">Eliminar</button>
+    `;
+    
+    // Ocultar estado vacío y agregar card
+    document.querySelector('.empty-state').style.display = 'none';
+    document.getElementById('cardsContainer').appendChild(card);
+    
+    // Limpiar formulario
+    clearForm();
+}
+
+function clearAllCards() {
+    const cardsContainer = document.getElementById('cardsContainer');
+    cardsContainer.innerHTML = `
+        <div class="empty-state">
+            <h3>No hay cards aún</h3>
+            <p>Agrega tu primera card usando el formulario superior</p>
+        </div>
+    `;
+    clearForm();
+}
+
+function clearForm() {
+    document.getElementById('cardTitle').value = '';
+    document.getElementById('cardText').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('formErrorMsg').style.display = 'none';
+}
+
+function checkEmptyState() {
+    const cards = document.querySelectorAll('.card');
+    const emptyState = document.querySelector('.empty-state');
+    if (cards.length === 0) {
+        emptyState.style.display = 'block';
+    }
+}
+
+// Manejo de la imagen
+document.getElementById('imageUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('imagePreview');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+
+<style>
+.error-message {
+    color: red;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: #ffe6e6;
+    border-radius: 4px;
+}
+</style>
 
  <footer id="footer" class="footer light-background">
     <div class="container">
