@@ -449,14 +449,6 @@ button {
   --surface-color: #ffffff;
 }
 
-.dark-background {
-  --background-color: #060606;
-  --default-color: #ffffff;
-  --heading-color: #ffffff;
-  --surface-color: #252525;
-  --contrast-color: #ffffff;
-}
-
 /* Smooth scroll */
 :root {
   scroll-behavior: smooth;
@@ -486,6 +478,71 @@ a {
   top: 0;        
   left: 0; 
   z-index: 1000;
+}
+
+/* Ajustes específicos para pantallas pequeñas (móviles) */
+@media (max-width: 767px) {
+  /* Header y logo */
+  .header {
+    padding: 12px 0;
+  }
+  .logo-img {
+    position: relative;
+    width: 140px;
+    left: auto;
+    top: auto;
+    margin: 0 auto 12px auto;
+    display: block;
+  }
+  .navmenu ul {
+    inset: 70px 12px 12px 12px;
+  }
+
+  /* Swiper y slides más compactos */
+  .swiper-img-fixed {
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+  }
+
+  /* Buscador responsivo */
+  .buscador-input {
+    max-width: 100%;
+    padding: 10px 12px;
+  }
+
+  /* Productos: cambiar a una columna y ajustar padding */
+  .productos-row {
+    gap: 18px;
+    margin-top: 18px;
+  }
+  .productos-row .card {
+    max-width: 95vw;
+    min-width: auto;
+    padding: 18px;
+  }
+
+  /* Contact form y secciones centradas */
+  .page-title, section, .section {
+    padding: 24px 12px;
+  }
+
+  /* Ajustes para el generador de cards */
+  .cards-container {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  /* Footer: reducir padding */
+  .footer {
+    padding: 28px 16px;
+  }
+
+  /* Botones más grandes y accesibles */
+  button, .btn-get-started, .btn-generate, .btn-clear {
+    padding: 12px 18px;
+    font-size: 16px;
+  }
 }
 
 .slide {
