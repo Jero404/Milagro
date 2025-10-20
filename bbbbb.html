@@ -64,12 +64,6 @@
 </head>
 
 <body>
-<div class="container">
-    <header>
-        <h1>Generador de banners</h1>
-        <p>Crea los banners de los productos y sus descripciones que se pueden mostrar/ocultar</p>
-    </header>
-    
     <div class="controls">
         <div class="form-group">
             <label for="imageUpload">Seleccionar imagen local:</label>
@@ -107,7 +101,60 @@
 </div>
 
 <script>
-// Funciones JavaScript necesarias
+// Clave para localStorage
+const STORAGE_KEY = 'savedCards';
+
+// Cargar cards al iniciar la página
+document.addEventListener('DOMContentLoaded', function() {
+    loadSavedCards();
+});
+
+// Función para guardar cards en localStorage
+function saveCardsToStorage() {
+    const cards = [];
+    document.querySelectorAll('.card').forEach(card => {
+        const cardData = {
+            title: card.querySelector('.card-title').textContent,
+            text: card.querySelector('.card-text').innerHTML,
+            image: card.querySelector('.card-image') ? card.querySelector('.card-image').src : null
+        };
+        cards.push(cardData);
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+}
+
+// Función para cargar cards desde localStorage
+function loadSavedCards() {
+    const savedCards = localStorage.getItem(STORAGE_KEY);
+    if (savedCards) {
+        const cards = JSON.parse(savedCards);
+        const cardsContainer = document.getElementById('cardsContainer');
+        const emptyState = document.querySelector('.empty-state');
+        
+        if (cards.length > 0) {
+            emptyState.style.display = 'none';
+            
+            cards.forEach(cardData => {
+                const card = createCardElement(cardData);
+                cardsContainer.appendChild(card);
+            });
+        }
+    }
+}
+
+// Función para crear elemento card
+function createCardElement(cardData) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+        ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title}" class="card-image">` : ''}
+        <h3 class="card-title">${cardData.title}</h3>
+        <div class="card-text">${cardData.text}</div>
+        <button class="btn-delete" onclick="deleteCard(this)">Eliminar</button>
+    `;
+    return card;
+}
+
 function generateCard() {
     const title = document.getElementById('cardTitle').value.trim();
     const text = document.getElementById('cardText').value.trim();
@@ -123,40 +170,53 @@ function generateCard() {
     
     errorMsg.style.display = 'none';
     
-    // Crear card
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-        ${imagePreview.style.display !== 'none' ? `<img src="${imagePreview.src}" alt="${title}" class="card-image">` : ''}
-        <h3 class="card-title">${title}</h3>
-        <div class="card-text">${text.replace(/\n/g, '<br>')}</div>
-        <button class="btn-delete" onclick="this.parentElement.remove(); checkEmptyState()">Eliminar</button>
-    `;
+    // Crear objeto card
+    const cardData = {
+        title: title,
+        text: text.replace(/\n/g, '<br>'),
+        image: imagePreview.style.display !== 'none' ? imagePreview.src : null
+    };
     
-    // Ocultar estado vacío y agregar card
-    document.querySelector('.empty-state').style.display = 'none';
-    document.getElementById('cardsContainer').appendChild(card);
+    // Crear y agregar card
+    const card = createCardElement(cardData);
+    const cardsContainer = document.getElementById('cardsContainer');
+    const emptyState = document.querySelector('.empty-state');
+    
+    emptyState.style.display = 'none';
+    cardsContainer.appendChild(card);
+    
+    // Guardar en localStorage
+    saveCardsToStorage();
     
     // Limpiar formulario
     clearForm();
 }
 
-function clearAllCards() {
-    const cardsContainer = document.getElementById('cardsContainer');
-    cardsContainer.innerHTML = `
-        <div class="empty-state">
-            <h3>No hay cards aún</h3>
-            <p>Agrega tu primera card usando el formulario superior</p>
-        </div>
-    `;
-    clearForm();
+function deleteCard(button) {
+    const card = button.parentElement;
+    card.remove();
+    
+    // Actualizar localStorage
+    saveCardsToStorage();
+    
+    // Mostrar estado vacío si no hay cards
+    checkEmptyState();
 }
 
-function clearForm() {
-    document.getElementById('cardTitle').value = '';
-    document.getElementById('cardText').value = '';
-    document.getElementById('imagePreview').style.display = 'none';
-    document.getElementById('formErrorMsg').style.display = 'none';
+function clearAllCards() {
+    if (confirm('¿Estás seguro de que quieres eliminar todas las cards?')) {
+        const cardsContainer = document.getElementById('cardsContainer');
+        cardsContainer.innerHTML = `
+            <div class="empty-state">
+                <h3>No hay cards aún</h3>
+                <p>Agrega tu primera card usando el formulario superior</p>
+            </div>
+        `;
+        
+        // Limpiar localStorage
+        localStorage.removeItem(STORAGE_KEY);
+        clearForm();
+    }
 }
 
 function checkEmptyState() {
@@ -167,12 +227,35 @@ function checkEmptyState() {
     }
 }
 
+function clearForm() {
+    document.getElementById('cardTitle').value = '';
+    document.getElementById('cardText').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('imagePreview').src = '';
+    document.getElementById('imageUpload').value = '';
+    document.getElementById('formErrorMsg').style.display = 'none';
+}
+
 // Manejo de la imagen
 document.getElementById('imageUpload').addEventListener('change', function(e) {
     const file = e.target.files[0];
     const preview = document.getElementById('imagePreview');
     
     if (file) {
+        // Validar tipo de archivo
+        if (!file.type.startsWith('image/')) {
+            alert('Por favor, selecciona un archivo de imagen válido');
+            this.value = '';
+            return;
+        }
+        
+        // Validar tamaño (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('La imagen no debe superar los 5MB');
+            this.value = '';
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = function(e) {
             preview.src = e.target.result;
@@ -182,6 +265,7 @@ document.getElementById('imageUpload').addEventListener('change', function(e) {
     }
 });
 </script>
+
 
 <style>
 .error-message {
