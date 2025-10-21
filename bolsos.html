@@ -59,32 +59,7 @@
 
     </div>
   </header>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedCards = localStorage.getItem('savedCards');
-            const container = document.getElementById('categoryContainer');
-            
-            if (savedCards) {
-                const cards = JSON.parse(savedCards);
-                const categoryCards = cards.filter(card => card.category === 'bolsos');
-                
-                if (categoryCards.length > 0) {
-                    container.innerHTML = '';
-                    
-                    categoryCards.forEach(cardData => {
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `
-                            ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title}" class="card-image">` : ''}
-                            <h3>${cardData.title}</h3>
-                            <div>${cardData.text}</div>
-                        `;
-                        container.appendChild(card);
-                    });
-                }
-            }
-        });
-</script>
+
 
   <section class="productos">
   <div class="productos-row" id="productos-row">
@@ -128,6 +103,28 @@ Un bolso encantador para quienes aman los detalles artesanales y los colores sua
   </section>
   </main>
 <!--footer-->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bolsos = JSON.parse(localStorage.getItem('savedCardsBolsos') || '[]');
+            const container = document.getElementById('bolsosContainer');
+            
+            if (bolsos.length > 0) {
+                container.innerHTML = '';
+                
+                bolsos.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
+                    cardElement.innerHTML = `
+                        ${card.image ? `<img src="${card.image}" alt="${card.title}" class="card-image">` : ''}
+                        <h3>${card.title}</h3>
+                        <div>${card.text}</div>
+                    `;
+                    container.appendChild(cardElement);
+                });
+            }
+        });
+    </script>
+
  <footer id="footer" class="footer light-background">
     <div class="container">
       <div class="row g-4">

@@ -80,7 +80,7 @@
         
         <div class="form-group">
             <label for="cardTitle">Título de la card:</label>
-            <input type="text" id="cardTitle" placeholder="Ingresa un título" aria-label="Título de la card">
+            <input type="text" id="cardTitle" placeholder="Ingresa un título (incluye 'bolso' o 'canasta')" aria-label="Título de la card">
         </div>
         
         <div class="form-group">
@@ -91,9 +91,9 @@
         <div class="form-group">
             <label for="cardCategory">Categoría:</label>
             <select id="cardCategory" aria-label="Categoría de la card">
+                <option value="">Selecciona una categoría</option>
                 <option value="bolsos">Bolsos</option>
                 <option value="canastas">Canastas</option>
-                <option value="otros">Otros</option>
             </select>
         </div>
         
@@ -102,7 +102,8 @@
         <div class="button-group">
             <button class="btn-generate" onclick="generateCard()">Generar Card</button>
             <button class="btn-clear" onclick="clearAllCards()">Limpiar Todo</button>
-            <button class="btn-view" onclick="viewCategories()">Ver Categorías</button>
+            <button class="btn-view-bolsos" onclick="viewBolsos()">Ver Bolsos</button>
+            <button class="btn-view-canastas" onclick="viewCanastas()">Ver Canastas</button>
         </div>
     </div>
     
@@ -115,57 +116,67 @@
 </div>
 
 <script>
-// Clave para localStorage
-const STORAGE_KEY = 'savedCards';
+// Claves para localStorage
+const STORAGE_KEY_BOLSOS = 'savedCardsBolsos';
+const STORAGE_KEY_CANASTAS = 'savedCardsCanastas';
 
 // Cargar cards al iniciar la página
 document.addEventListener('DOMContentLoaded', function() {
-    loadSavedCards();
+    loadAllCards();
 });
 
-// Función para determinar categoría basada en título (alternativa automática)
-function detectCategory(title) {
+// Función para determinar categoría basada en título
+function getCategoryFromTitle(title) {
     const titleLower = title.toLowerCase();
-    if (titleLower.includes('bolso') || titleLower.includes('cartera') || titleLower.includes('mochila')) {
+    if (titleLower.includes('bolso') || titleLower.includes('bolsa') || titleLower.includes('mochila')) {
         return 'bolsos';
     } else if (titleLower.includes('canasta') || titleLower.includes('cesta') || titleLower.includes('canastro')) {
         return 'canastas';
-    } else {
-        return 'otros';
     }
+    return 'otros';
 }
 
-// Función para guardar cards en localStorage
+// Función para guardar cards en localStorage según categoría
 function saveCardsToStorage() {
-    const cards = [];
+    const bolsos = [];
+    const canastas = [];
+    
     document.querySelectorAll('.card').forEach(card => {
+        const category = card.getAttribute('data-category');
         const cardData = {
             title: card.querySelector('.card-title').textContent,
             text: card.querySelector('.card-text').innerHTML,
             image: card.querySelector('.card-image') ? card.querySelector('.card-image').src : null,
-            category: card.dataset.category
+            category: category
         };
-        cards.push(cardData);
+        
+        if (category === 'bolsos') {
+            bolsos.push(cardData);
+        } else if (category === 'canastas') {
+            canastas.push(cardData);
+        }
     });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+    
+    localStorage.setItem(STORAGE_KEY_BOLSOS, JSON.stringify(bolsos));
+    localStorage.setItem(STORAGE_KEY_CANASTAS, JSON.stringify(canastas));
 }
 
-// Función para cargar cards desde localStorage
-function loadSavedCards() {
-    const savedCards = localStorage.getItem(STORAGE_KEY);
-    if (savedCards) {
-        const cards = JSON.parse(savedCards);
-        const cardsContainer = document.getElementById('cardsContainer');
-        const emptyState = document.querySelector('.empty-state');
+// Función para cargar todas las cards
+function loadAllCards() {
+    const bolsos = JSON.parse(localStorage.getItem(STORAGE_KEY_BOLSOS) || '[]');
+    const canastas = JSON.parse(localStorage.getItem(STORAGE_KEY_CANASTAS) || '[]');
+    const allCards = [...bolsos, ...canastas];
+    
+    const cardsContainer = document.getElementById('cardsContainer');
+    const emptyState = document.querySelector('.empty-state');
+    
+    if (allCards.length > 0) {
+        emptyState.style.display = 'none';
         
-        if (cards.length > 0) {
-            emptyState.style.display = 'none';
-            
-            cards.forEach(cardData => {
-                const card = createCardElement(cardData);
-                cardsContainer.appendChild(card);
-            });
-        }
+        allCards.forEach(cardData => {
+            const card = createCardElement(cardData);
+            cardsContainer.appendChild(card);
+        });
     }
 }
 
@@ -173,16 +184,18 @@ function loadSavedCards() {
 function createCardElement(cardData) {
     const card = document.createElement('div');
     card.className = 'card';
-    card.dataset.category = cardData.category;
+    card.setAttribute('data-category', cardData.category);
+    
+    const categoryBadge = cardData.category === 'bolsos' ? 
+        '<span class="category-badge bolsos-badge">Bolsos</span>' : 
+        '<span class="category-badge canastas-badge">Canastas</span>';
+    
     card.innerHTML = `
+        ${categoryBadge}
         ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title}" class="card-image">` : ''}
         <h3 class="card-title">${cardData.title}</h3>
-        <div class="card-category">Categoría: ${cardData.category}</div>
         <div class="card-text">${cardData.text}</div>
-        <div class="card-actions">
-            <button class="btn-delete" onclick="deleteCard(this)">Eliminar</button>
-            <button class="btn-view-page" onclick="viewInCategory('${cardData.category}')">Ver en ${cardData.category}</button>
-        </div>
+        <button class="btn-delete" onclick="deleteCard(this)">Eliminar</button>
     `;
     return card;
 }
@@ -190,18 +203,24 @@ function createCardElement(cardData) {
 function generateCard() {
     const title = document.getElementById('cardTitle').value.trim();
     const text = document.getElementById('cardText').value.trim();
-    const category = document.getElementById('cardCategory').value;
+    const categorySelect = document.getElementById('cardCategory').value;
     const imagePreview = document.getElementById('imagePreview');
     const errorMsg = document.getElementById('formErrorMsg');
     
     // Validación
-    if (!title || !text) {
-        errorMsg.textContent = 'Por favor, completa título y texto';
+    if (!title || !text || !categorySelect) {
+        errorMsg.textContent = 'Por favor, completa todos los campos obligatorios';
         errorMsg.style.display = 'block';
         return;
     }
     
     errorMsg.style.display = 'none';
+    
+    // Determinar categoría (prioridad al selector, luego al título)
+    let category = categorySelect;
+    if (!category) {
+        category = getCategoryFromTitle(title);
+    }
     
     // Crear objeto card
     const cardData = {
@@ -227,7 +246,7 @@ function generateCard() {
 }
 
 function deleteCard(button) {
-    const card = button.parentElement.parentElement;
+    const card = button.parentElement;
     card.remove();
     
     // Actualizar localStorage
@@ -248,28 +267,22 @@ function clearAllCards() {
         `;
         
         // Limpiar localStorage
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(STORAGE_KEY_BOLSOS);
+        localStorage.removeItem(STORAGE_KEY_CANASTAS);
         clearForm();
     }
 }
 
-function viewInCategory(category) {
-    // Guardar la categoría que queremos ver
-    localStorage.setItem('currentCategory', category);
-    
-    // Redirigir a la página de la categoría
-    if (category === 'bolsos') {
-        window.open('bolsos.html', '_blank');
-    } else if (category === 'canastas') {
-        window.open('canastas.html', '_blank');
-    } else {
-        window.open('otros.html', '_blank');
-    }
+function viewBolsos() {
+    // Guardar en sessionStorage qué categoría queremos ver
+    sessionStorage.setItem('viewCategory', 'bolsos');
+    window.location.href = 'bolsos.html';
 }
 
-function viewCategories() {
-    // Redirigir a una página que muestre todas las categorías
-    window.open('categorias.html', '_blank');
+function viewCanastas() {
+    // Guardar en sessionStorage qué categoría queremos ver
+    sessionStorage.setItem('viewCategory', 'canastas');
+    window.location.href = 'canastas.html';
 }
 
 function checkEmptyState() {
@@ -283,6 +296,7 @@ function checkEmptyState() {
 function clearForm() {
     document.getElementById('cardTitle').value = '';
     document.getElementById('cardText').value = '';
+    document.getElementById('cardCategory').value = '';
     document.getElementById('imagePreview').style.display = 'none';
     document.getElementById('imagePreview').src = '';
     document.getElementById('imageUpload').value = '';
@@ -295,14 +309,12 @@ document.getElementById('imageUpload').addEventListener('change', function(e) {
     const preview = document.getElementById('imagePreview');
     
     if (file) {
-        // Validar tipo de archivo
         if (!file.type.startsWith('image/')) {
             alert('Por favor, selecciona un archivo de imagen válido');
             this.value = '';
             return;
         }
         
-        // Validar tamaño (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
             alert('La imagen no debe superar los 5MB');
             this.value = '';
@@ -318,6 +330,7 @@ document.getElementById('imageUpload').addEventListener('change', function(e) {
     }
 });
 </script>
+
 <style>
 .error-message {
     color: red;

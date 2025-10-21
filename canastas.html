@@ -59,32 +59,6 @@
     </div>
   </header>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedCards = localStorage.getItem('savedCards');
-            const container = document.getElementById('categoryContainer');
-            
-            if (savedCards) {
-                const cards = JSON.parse(savedCards);
-                const categoryCards = cards.filter(card => card.category === 'canastas');
-                
-                if (categoryCards.length > 0) {
-                    container.innerHTML = '';
-                    
-                    categoryCards.forEach(cardData => {
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `
-                            ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title}" class="card-image">` : ''}
-                            <h3>${cardData.title}</h3>
-                            <div>${cardData.text}</div>
-                        `;
-                        container.appendChild(card);
-                    });
-                }
-            }
-        });
-</script>
   <section class="productos">
     <div class="productos-row">
       <div class="card">
@@ -174,6 +148,28 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
       </div>
     </div>
   </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canastas = JSON.parse(localStorage.getItem('savedCardsCanastas') || '[]');
+            const container = document.getElementById('canastasContainer');
+            
+            if (canastas.length > 0) {
+                container.innerHTML = '';
+                
+                canastas.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
+                    cardElement.innerHTML = `
+                        ${card.image ? `<img src="${card.image}" alt="${card.title}" class="card-image">` : ''}
+                        <h3>${card.title}</h3>
+                        <div>${card.text}</div>
+                    `;
+                    container.appendChild(cardElement);
+                });
+            }
+        });
+    </script>
 
   <!-- Scroll Top -->
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
