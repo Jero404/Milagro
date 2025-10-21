@@ -60,7 +60,6 @@
     </div>
   </header>
 
-
   <section class="productos">
   <div class="productos-row" id="productos-row">
     <div class="card">
@@ -154,6 +153,45 @@ Un bolso encantador para quienes aman los detalles artesanales y los colores sua
       }
     });
   </script>
+
+    <script>
+    // Optional: realtime Firestore listener for remote cards (requires setting window.FIREBASE_CONFIG)
+  if (window.FIREBASE_CONFIG) {
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(window.FIREBASE_CONFIG);
+        const db = firebase.firestore();
+        const container = document.getElementById('productos-row');
+        db.collection('cards').where('tipo','==','bolsos').orderBy('createdAt','desc')
+          .onSnapshot(snapshot => {
+            // Append or refresh remote cards (we keep local unique handling above)
+            snapshot.docChanges().forEach(change => {
+              if (change.type === 'added') {
+                const data = change.doc.data();
+                const el = document.createElement('div'); el.className='card remote-card';
+                el.innerHTML = `${data.imageUrl?`<img src="${data.imageUrl}" class="card-image">`:''}<h3>${data.title}</h3><div>${data.desc}</div>`;
+                if (container) container.insertBefore(el, container.firstChild);
+              }
+              // TODO: handle modified/removed
+            });
+          });
+      } catch(e){ console.warn('Firestore listener error', e); }
+    }
+    </script>
+
+    <script>
+      // Provide firebase config from user (if not injected already)
+      if (!window.FIREBASE_CONFIG) {
+        window.FIREBASE_CONFIG = {
+          apiKey: "AIzaSyCwmZknjZhJLyrl6XtaJKu_q9IL1f9v3tM",
+          authDomain: "milagro-53c93.firebaseapp.com",
+          projectId: "milagro-53c93",
+          storageBucket: "milagro-53c93.firebasestorage.app",
+          messagingSenderId: "899696918093",
+          appId: "1:899696918093:web:ccf853e2c1406b52cfe604",
+          measurementId: "G-SYV6TMR5RB"
+        };
+      }
+    </script>
 
  <footer id="footer" class="footer light-background">
     <div class="container">

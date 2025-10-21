@@ -101,6 +101,7 @@
         <div class="button-group">
             <button class="btn-generate" onclick="generateCard()">Generar Card</button>
             <button class="btn-clear" onclick="clearAllCards()">Limpiar Todo</button>
+          <button class="btn-publish" onclick="publishCardToFirebase()">Publicar en la nube</button>
             <button class="btn-view-bolsos" onclick="viewBolsos()">Ver Bolsos</button>
             <button class="btn-view-canastas" onclick="viewCanastas()">Ver Canastas</button>
         </div>
@@ -114,231 +115,7 @@
     </div>
 </div>
 
-<script>
-// Claves para localStorage
-const STORAGE_KEY_BOLSOS = 'savedCardsBolsos';
-const STORAGE_KEY_CANASTAS = 'savedCardsCanastas';
 
-// Cargar cards al iniciar la página
-document.addEventListener('DOMContentLoaded', function() {
-    loadAllCards();
-});
-
-// Función para determinar categoría basada en título
-function getCategoryFromTitle(title) {
-    const titleLower = title.toLowerCase();
-    if (titleLower.includes('bolso') || titleLower.includes('bolsa') || titleLower.includes('mochila')) {
-        return 'bolsos';
-    } else if (titleLower.includes('canasta') || titleLower.includes('cesta') || titleLower.includes('canastro')) {
-        return 'canastas';
-    }
-    return 'otros';
-}
-
-// Función para guardar cards en localStorage según categoría
-function saveCardsToStorage() {
-    const bolsos = [];
-    const canastas = [];
-    
-    document.querySelectorAll('.card').forEach(card => {
-        const category = card.getAttribute('data-category');
-        const cardData = {
-            title: card.querySelector('.card-title').textContent,
-            text: card.querySelector('.card-text').innerHTML,
-            image: card.querySelector('.card-image') ? card.querySelector('.card-image').src : null,
-            category: category
-        };
-        
-        if (category === 'bolsos') {
-            bolsos.push(cardData);
-        } else if (category === 'canastas') {
-            canastas.push(cardData);
-        }
-    });
-    
-    localStorage.setItem(STORAGE_KEY_BOLSOS, JSON.stringify(bolsos));
-    localStorage.setItem(STORAGE_KEY_CANASTAS, JSON.stringify(canastas));
-}
-
-// Función para cargar todas las cards
-function loadAllCards() {
-    const bolsos = JSON.parse(localStorage.getItem(STORAGE_KEY_BOLSOS) || '[]');
-    const canastas = JSON.parse(localStorage.getItem(STORAGE_KEY_CANASTAS) || '[]');
-    const allCards = [...bolsos, ...canastas];
-    
-    const cardsContainer = document.getElementById('cardsContainer');
-    const emptyState = document.querySelector('.empty-state');
-    
-    if (allCards.length > 0) {
-        emptyState.style.display = 'none';
-        
-        allCards.forEach(cardData => {
-            const card = createCardElement(cardData);
-            cardsContainer.appendChild(card);
-        });
-    }
-}
-
-// Función para crear elemento card
-function createCardElement(cardData) {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.setAttribute('data-category', cardData.category);
-    
-    const categoryBadge = cardData.category === 'bolsos' ? 
-        '<span class="category-badge bolsos-badge">Bolsos</span>' : 
-        '<span class="category-badge canastas-badge">Canastas</span>';
-    
-    card.innerHTML = `
-        ${categoryBadge}
-        ${cardData.image ? `<img src="${cardData.image}" alt="${cardData.title}" class="card-image">` : ''}
-        <h3 class="card-title">${cardData.title}</h3>
-        <div class="card-text">${cardData.text}</div>
-        <button class="btn-delete" onclick="deleteCard(this)">Eliminar</button>
-    `;
-    return card;
-}
-
-function generateCard() {
-    const title = document.getElementById('cardTitle').value.trim();
-    const text = document.getElementById('cardText').value.trim();
-    const categorySelect = document.getElementById('cardCategory').value;
-    const imagePreview = document.getElementById('imagePreview');
-    const errorMsg = document.getElementById('formErrorMsg');
-    
-    // Validación
-    if (!title || !text || !categorySelect) {
-        errorMsg.textContent = 'Por favor, completa todos los campos obligatorios';
-        errorMsg.style.display = 'block';
-        return;
-    }
-    
-    errorMsg.style.display = 'none';
-    
-    // Determinar categoría (prioridad al selector, luego al título)
-    let category = categorySelect;
-    if (!category) {
-        category = getCategoryFromTitle(title);
-    }
-    
-    // Crear objeto card
-    const cardData = {
-        title: title,
-        text: text.replace(/\n/g, '<br>'),
-        image: imagePreview.style.display !== 'none' ? imagePreview.src : null,
-        category: category
-    };
-    
-    // Crear y agregar card
-    const card = createCardElement(cardData);
-    const cardsContainer = document.getElementById('cardsContainer');
-    const emptyState = document.querySelector('.empty-state');
-    
-    emptyState.style.display = 'none';
-    cardsContainer.appendChild(card);
-    
-    // Guardar en localStorage
-    saveCardsToStorage();
-    
-    // Limpiar formulario
-    clearForm();
-}
-
-function deleteCard(button) {
-    const card = button.parentElement;
-    card.remove();
-    
-    // Actualizar localStorage
-    saveCardsToStorage();
-    
-    // Mostrar estado vacío si no hay cards
-    checkEmptyState();
-}
-
-function clearAllCards() {
-    if (confirm('¿Estás seguro de que quieres eliminar todas las cards?')) {
-        const cardsContainer = document.getElementById('cardsContainer');
-        cardsContainer.innerHTML = `
-            <div class="empty-state">
-                <h3>No hay cards aún</h3>
-                <p>Agrega tu primera card usando el formulario superior</p>
-            </div>
-        `;
-        
-        // Limpiar localStorage
-        localStorage.removeItem(STORAGE_KEY_BOLSOS);
-        localStorage.removeItem(STORAGE_KEY_CANASTAS);
-        clearForm();
-    }
-}
-
-function viewBolsos() {
-    // Guardar en sessionStorage qué categoría queremos ver
-    sessionStorage.setItem('viewCategory', 'bolsos');
-    window.location.href = 'bolsos.html';
-}
-
-function viewCanastas() {
-    // Guardar en sessionStorage qué categoría queremos ver
-    sessionStorage.setItem('viewCategory', 'canastas');
-    window.location.href = 'canastas.html';
-}
-
-function checkEmptyState() {
-    const cards = document.querySelectorAll('.card');
-    const emptyState = document.querySelector('.empty-state');
-    if (cards.length === 0) {
-        emptyState.style.display = 'block';
-    }
-}
-
-function clearForm() {
-    document.getElementById('cardTitle').value = '';
-    document.getElementById('cardText').value = '';
-    document.getElementById('cardCategory').value = '';
-    document.getElementById('imagePreview').style.display = 'none';
-    document.getElementById('imagePreview').src = '';
-    document.getElementById('imageUpload').value = '';
-    document.getElementById('formErrorMsg').style.display = 'none';
-}
-
-// Manejo de la imagen
-document.getElementById('imageUpload').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const preview = document.getElementById('imagePreview');
-    
-    if (file) {
-        if (!file.type.startsWith('image/')) {
-            alert('Por favor, selecciona un archivo de imagen válido');
-            this.value = '';
-            return;
-        }
-        
-        if (file.size > 5 * 1024 * 1024) {
-            alert('La imagen no debe superar los 5MB');
-            this.value = '';
-            return;
-        }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        }
-        reader.readAsDataURL(file);
-    }
-});
-</script>
-
-<style>
-.error-message {
-    color: red;
-    margin-bottom: 10px;
-    padding: 8px;
-    background: #ffe6e6;
-    border-radius: 4px;
-}
-</style>
 
  <footer id="footer" class="footer light-background">
     <div class="container">
@@ -403,6 +180,24 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
   <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
 
   <!-- Main JS File -->
+  <!-- Firebase config (paste your config here) -->
+  <script>
+    window.FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCwmZknjZhJLyrl6XtaJKu_q9IL1f9v3tM",
+      authDomain: "milagro-53c93.firebaseapp.com",
+      projectId: "milagro-53c93",
+      storageBucket: "milagro-53c93.firebasestorage.app",
+      messagingSenderId: "899696918093",
+      appId: "1:899696918093:web:ccf853e2c1406b52cfe604",
+      measurementId: "G-SYV6TMR5RB"
+    };
+  </script>
+  <!-- Firebase SDKs (optional) - paste your firebase config into window.FIREBASE_CONFIG -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
   <!-- Lógica de creación de cards para bbbbb.html -->
   <script>
     // State
@@ -440,16 +235,45 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
       // Clear existing product cards (keep empty-state element)
       container.querySelectorAll('.card').forEach(card => card.remove());
 
+      // Read both internal (cards_*) and compatibility (savedCards*) keys
+      const cardsBol = JSON.parse(localStorage.getItem('cards_bolsos') || '[]');
+      const savedBol = JSON.parse(localStorage.getItem('savedCardsBolsos') || '[]');
+      const cardsCan = JSON.parse(localStorage.getItem('cards_canastas') || '[]');
+      const savedCan = JSON.parse(localStorage.getItem('savedCardsCanastas') || '[]');
+
+      // Normalize into common shape
+      const normalizeFromCards = (c) => ({ id: c.id, img: c.img, titulo: c.titulo, desc: c.desc, tipo: 'bolsos' });
+      const normalizeFromSaved = (c, tipo) => ({ id: c.id || (c.title ? (c.title + '|' + (c.image || '')) : ('saved-' + Math.random())), img: c.image || c.img || null, titulo: c.title || c.titulo || '', desc: c.text || c.desc || '', tipo: tipo });
+
+      const combined = [];
+      cardsBol.forEach(c => combined.push({ id: c.id, img: c.img, titulo: c.titulo, desc: c.desc, tipo: 'bolsos' }));
+      savedBol.forEach(c => combined.push(normalizeFromSaved(c, 'bolsos')));
+      cardsCan.forEach(c => combined.push({ id: c.id, img: c.img, titulo: c.titulo, desc: c.desc, tipo: 'canastas' }));
+      savedCan.forEach(c => combined.push(normalizeFromSaved(c, 'canastas')));
+
+      // Deduplicate by id (prefer cards_* entries over saved ones)
+      const seen = new Set();
       let total = 0;
-      ['bolsos', 'canastas'].forEach(tipo => {
-        const cards = JSON.parse(localStorage.getItem('cards_' + tipo) || '[]');
-        cards.forEach(card => {
-          createCardElement(card.img, card.titulo, card.desc, card.id, tipo);
+      combined.forEach(item => {
+        const key = item.id || (item.titulo + '|' + (item.img || ''));
+        if (!seen.has(key)) {
+          seen.add(key);
+          createCardElement(item.img, item.titulo, item.desc, item.id || key, item.tipo);
           total++;
-        });
+        }
       });
 
       if (emptyState) emptyState.style.display = total > 0 ? 'none' : 'block';
+    }
+
+    // Keep compatibility keys (savedCardsBolsos / savedCardsCanastas) in sync with internal cards_* format
+    function syncSavedFromCards() {
+      ['bolsos', 'canastas'].forEach(tipo => {
+        const cards = JSON.parse(localStorage.getItem('cards_' + tipo) || '[]');
+        const mapped = cards.map(c => ({ title: c.titulo || '', text: c.desc || '', image: c.img || c.image || null }));
+        if (tipo === 'bolsos') localStorage.setItem('savedCardsBolsos', JSON.stringify(mapped));
+        if (tipo === 'canastas') localStorage.setItem('savedCardsCanastas', JSON.stringify(mapped));
+      });
     }
 
     // DOMContent loaded: cleanup, listeners, initial render
@@ -525,13 +349,14 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
       else if (/canasta|canastas|cesta/i.test(title)) tipo = 'canastas';
 
       // If editing, update existing
-      if (editingCardId) {
+  if (editingCardId) {
         if (tipo) {
           let cards = JSON.parse(localStorage.getItem('cards_' + tipo) || '[]');
           const idx = cards.findIndex(c => c.id === editingCardId);
           if (idx !== -1) {
             cards[idx] = { id: editingCardId, img: image || cards[idx].img, titulo: title, desc: text };
             localStorage.setItem('cards_' + tipo, JSON.stringify(cards));
+            syncSavedFromCards();
           } else {
             // If not found in inferred tipo, try both lists
             ['bolsos', 'canastas'].forEach(t => {
@@ -540,6 +365,7 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
               if (j !== -1) {
                 list[j] = { id: editingCardId, img: image || list[j].img, titulo: title, desc: text };
                 localStorage.setItem('cards_' + t, JSON.stringify(list));
+                syncSavedFromCards();
               }
             });
           }
@@ -564,7 +390,8 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
         cards.push(nuevaCard);
         localStorage.setItem('cards_bolsos', JSON.stringify(cards));
       }
-
+      // After creating, sync compatibility keys and render
+      syncSavedFromCards();
       renderStoredCards();
       resetForm();
     };
@@ -601,6 +428,7 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
         cards = cards.filter(c => c.id !== cardId);
         localStorage.setItem('cards_' + tipo, JSON.stringify(cards));
       });
+      syncSavedFromCards();
       renderStoredCards();
     };
 
@@ -643,6 +471,7 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
       if (!confirm('¿Estás seguro de que quieres eliminar todas las cards?')) return;
       localStorage.removeItem('cards_bolsos');
       localStorage.removeItem('cards_canastas');
+      syncSavedFromCards();
       const container = document.getElementById('cardsContainer');
       container.innerHTML = `
         <div class="empty-state">
@@ -670,6 +499,48 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
       editingCardId = null;
       const btn = document.querySelector('.btn-generate');
       if (btn) btn.textContent = 'Generar Card';
+    }
+  </script>
+
+  <script>
+    // Firebase optional integration: provide window.FIREBASE_CONFIG in a script before this runs
+    if (window.FIREBASE_CONFIG) {
+      try {
+        firebase.initializeApp(window.FIREBASE_CONFIG);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Upload image to Firebase Storage and create Firestore doc
+        async function uploadImageAndSaveCard(file, title, desc, tipo) {
+          const id = 'card-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+          const ref = storage.ref().child('cards/' + id + (file.name ? '_' + file.name : ''));
+          await ref.put(file);
+          const url = await ref.getDownloadURL();
+          await db.collection('cards').doc(id).set({ title, desc, imageUrl: url, tipo, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+          return id;
+        }
+
+        // Expose a function to save current form to Firebase (if user wants to publish to cloud)
+        window.publishCardToFirebase = async function() {
+          const title = document.getElementById('cardTitle').value.trim();
+          const desc = document.getElementById('cardText').value.trim();
+          const tipo = document.getElementById('cardCategory').value || ( /bolso/i.test(title) ? 'bolsos' : 'canastas' );
+          const fileInput = document.getElementById('imageUpload');
+          if (!fileInput || !fileInput.files[0]) { alert('Selecciona una imagen antes de publicar'); return; }
+          try {
+            const id = await uploadImageAndSaveCard(fileInput.files[0], title, desc, tipo);
+            alert('Card publicada en Firebase con id: ' + id);
+          } catch (err) {
+            console.error(err);
+            alert('Error publicando card en Firebase: ' + err.message);
+          }
+        };
+
+      } catch (err) {
+        console.warn('Firebase init failed', err);
+      }
+    } else {
+      // No Firebase config provided; no-op
     }
   </script>
 
