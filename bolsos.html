@@ -129,10 +129,12 @@ Un bolso encantador para quienes aman los detalles artesanales y los colores sua
           unique.forEach(card => {
             const cardElement = document.createElement('div');
             cardElement.className = 'card';
+            const descId = 'desc-' + (card.id || Math.random().toString(36).slice(2,9));
             cardElement.innerHTML = `
               ${card.image ? `<img src="${card.image}" alt="${card.title}" class="card-image">` : ''}
               <h3>${card.title}</h3>
-              <div>${card.text}</div>
+              <button class="boton" onclick="document.getElementById('${descId}').classList.toggle('d-none')">Ver descripción</button>
+              <p id="${descId}" class="d-none">${card.text}</p>
             `;
             container.appendChild(cardElement);
           });
@@ -167,8 +169,15 @@ Un bolso encantador para quienes aman los detalles artesanales y los colores sua
             snapshot.docChanges().forEach(change => {
               if (change.type === 'added') {
                 const data = change.doc.data();
+                const id = change.doc.id || Math.random().toString(36).slice(2,9);
                 const el = document.createElement('div'); el.className='card remote-card';
-                el.innerHTML = `${data.imageUrl?`<img src="${data.imageUrl}" class="card-image">`:''}<h3>${data.title}</h3><div>${data.desc}</div>`;
+                const descId = 'remote-desc-' + id;
+                el.innerHTML = `
+                  ${data.imageUrl?`<img src="${data.imageUrl}" class="card-image">`:''}
+                  <h3>${data.title}</h3>
+                  <button class="boton" onclick="document.getElementById('${descId}').classList.toggle('d-none')">Ver descripción</button>
+                  <p id="${descId}" class="d-none">${data.desc}</p>
+                `;
                 if (container) container.insertBefore(el, container.firstChild);
               }
               // TODO: handle modified/removed
