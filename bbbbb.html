@@ -393,6 +393,20 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
       // After creating, sync compatibility keys and render
       syncSavedFromCards();
       renderStoredCards();
+
+      // Mirror to Firebase if configured (async, fire-and-forget)
+      try {
+        if (window.FIREBASE_CONFIG && window.firebase) {
+          // compute fingerprint and mirror
+          const storedTipo = tipo || 'bolsos';
+          const cardForMirror = { id: cardId, img: image, titulo: title, desc: text, tipo: storedTipo };
+          // async but do not block UI
+          mirrorCardToFirebase(cardForMirror).catch(err => console.warn('Mirror failed', err));
+        }
+      } catch (err) {
+        console.warn('Mirror skipped', err);
+      }
+
       resetForm();
     };
 
@@ -429,6 +443,27 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
         localStorage.setItem('cards_' + tipo, JSON.stringify(cards));
       });
       syncSavedFromCards();
+      // Attempt to remove from Firestore if mirrored (non-blocking)
+      try {
+        if (window.FIREBASE_CONFIG && window.firebase) {
+          // We need to determine fingerprint from stored lists
+          ['bolsos', 'canastas'].forEach(async tipo => {
+            const list = JSON.parse(localStorage.getItem('cards_' + tipo) || '[]');
+            // find in previous storage? since we've already removed, try older snapshot from DOM
+            const dom = document.querySelector(`.card[data-card-id='${cardId}']`);
+            let titulo = null; let img = null;
+            if (dom) {
+              titulo = dom.querySelector('.card-title') ? dom.querySelector('.card-title').textContent : '';
+              img = dom.querySelector('img') ? dom.querySelector('img').src : '';
+            }
+            const fingerprint = makeFingerprint(titulo || '', img || '');
+            if (fingerprint) {
+              try { await db.collection('cards').doc(fingerprint).delete(); } catch(e) { /* ignore */ }
+            }
+          });
+        }
+      } catch (err) { /* ignore */ }
+
       renderStoredCards();
     };
 
@@ -481,6 +516,20 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
       `;
       cardCounter = 0;
       document.getElementById('formErrorMsg').style.display = 'none';
+      // Attempt bulk delete in Firestore (non-blocking)
+      try {
+        if (window.FIREBASE_CONFIG && window.firebase) {
+          // naive approach: query all cards of tipo bolsos/canastas and delete
+          ['bolsos', 'canastas'].forEach(async tipo => {
+            try {
+              const snapshot = await db.collection('cards').where('tipo', '==', tipo).get();
+              const batch = db.batch();
+              snapshot.forEach(doc => batch.delete(doc.ref));
+              await batch.commit();
+            } catch (e) { /* ignore */ }
+          });
+        }
+      } catch (err) { /* ignore */ }
     };
 
     function resetForm() {
@@ -510,14 +559,64 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
         const db = firebase.firestore();
         const storage = firebase.storage();
 
-        // Upload image to Firebase Storage and create Firestore doc
-        async function uploadImageAndSaveCard(file, title, desc, tipo) {
-          const id = 'card-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
-          const ref = storage.ref().child('cards/' + id + (file.name ? '_' + file.name : ''));
-          await ref.put(file);
-          const url = await ref.getDownloadURL();
-          await db.collection('cards').doc(id).set({ title, desc, imageUrl: url, tipo, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-          return id;
+        // Utilities: stable fingerprint from title + image URL/data
+        function normalizeKey(s) {
+          return (s || '').toString().trim().toLowerCase().replace(/\s+/g, ' ').replace(/[^a-z0-9 ]/g, '');
+        }
+        function makeFingerprint(title, imageUrl) {
+          const t = normalizeKey(title || '');
+          const i = normalizeKey(imageUrl || '');
+          return (t + '|' + i).slice(0, 190); // keep it short enough for doc id
+        }
+
+        // Convert dataURL to Blob (if selectedImageUrl is a data URL)
+        function dataURLtoBlob(dataurl) {
+          if (!dataurl) return null;
+          // If not a data URL, we won't convert here
+          if (!dataurl.startsWith('data:')) return null;
+          const arr = dataurl.split(',');
+          const mime = arr[0].match(/:(.*?);/)[1];
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          return new Blob([u8arr], { type: mime });
+        }
+
+        // Upload image to Firebase Storage and create/update Firestore doc using fingerprint as doc ID
+        async function uploadImageAndSaveCardUsingFingerprint(card) {
+          // card: { id, img (dataURL or url), titulo, desc, tipo }
+          const fingerprint = makeFingerprint(card.titulo, card.img || '');
+          const docId = fingerprint || ('card-' + Date.now() + '-' + Math.floor(Math.random() * 10000));
+
+          let imageUrlToStore = card.img || null;
+
+          // If img is a dataURL, convert and upload
+          const blob = dataURLtoBlob(card.img);
+          if (blob) {
+            const filename = docId + '.png';
+            const ref = storage.ref().child('cards/' + filename);
+            await ref.put(blob);
+            imageUrlToStore = await ref.getDownloadURL();
+          }
+
+          // Save Firestore doc at docId. Use merge to allow updates.
+          await db.collection('cards').doc(docId).set({ title: card.titulo || '', desc: card.desc || '', imageUrl: imageUrlToStore || '', tipo: card.tipo || '', fingerprint: fingerprint, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+          return docId;
+        }
+
+        // Mirror helper that handles missing Firebase gracefully
+        async function mirrorCardToFirebase(card) {
+          if (!window.FIREBASE_CONFIG || !window.firebase) return null;
+          try {
+            const id = await uploadImageAndSaveCardUsingFingerprint(card);
+            return id;
+          } catch (err) {
+            console.warn('Error mirroring card to Firebase', err);
+            throw err;
+          }
         }
 
         // Expose a function to save current form to Firebase (if user wants to publish to cloud)
@@ -526,13 +625,26 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
           const desc = document.getElementById('cardText').value.trim();
           const tipo = document.getElementById('cardCategory').value || ( /bolso/i.test(title) ? 'bolsos' : 'canastas' );
           const fileInput = document.getElementById('imageUpload');
-          if (!fileInput || !fileInput.files[0]) { alert('Selecciona una imagen antes de publicar'); return; }
+          let fileToUse = null;
+          if (fileInput && fileInput.files && fileInput.files[0]) fileToUse = fileInput.files[0];
           try {
-            const id = await uploadImageAndSaveCard(fileInput.files[0], title, desc, tipo);
-            alert('Card publicada en Firebase con id: ' + id);
+            // If user selected a file, use direct upload path
+            if (fileToUse) {
+              const id = await uploadImageAndSaveCard(fileToUse, title, desc, tipo);
+              alert('Card publicada en Firebase con id: ' + id);
+              return;
+            }
+            // Otherwise if selectedImageUrl is a dataURL, use fingerprinted upload
+            if (selectedImageUrl) {
+              const card = { id: null, img: selectedImageUrl, titulo: title, desc, tipo };
+              const id = await uploadImageAndSaveCardUsingFingerprint(card);
+              alert('Card publicada en Firebase con id: ' + id);
+              return;
+            }
+            alert('Selecciona una imagen antes de publicar');
           } catch (err) {
             console.error(err);
-            alert('Error publicando card en Firebase: ' + err.message);
+            alert('Error publicando card en Firebase: ' + (err.message || err));
           }
         };
 
