@@ -101,29 +101,59 @@ Cuenta con una borla lateral decorativa y un lazo frontal que aportan un toque c
 Un bolso encantador para quienes aman los detalles artesanales y los colores suaves.</p>
   </div>
   </section>
-  </main>
 <!--footer-->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const bolsos = JSON.parse(localStorage.getItem('savedCardsBolsos') || '[]');
-            const container = document.getElementById('bolsosContainer');
-            
-            if (bolsos.length > 0) {
-                container.innerHTML = '';
-                
-                bolsos.forEach(card => {
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'card';
-                    cardElement.innerHTML = `
-                        ${card.image ? `<img src="${card.image}" alt="${card.title}" class="card-image">` : ''}
-                        <h3>${card.title}</h3>
-                        <div>${card.text}</div>
-                    `;
-                    container.appendChild(cardElement);
-                });
-            }
-        });
-    </script>
+  <script>
+    // Render function for bolsos
+    function renderBolsos() {
+      const rawA = JSON.parse(localStorage.getItem('savedCardsBolsos') || '[]');
+      const rawB = JSON.parse(localStorage.getItem('cards_bolsos') || '[]');
+      const container = document.getElementById('productos-row');
+      const normalize = (c) => ({
+        id: c.id || (c.title ? (c.title + '|' + (c.image || c.img || '')) : null),
+        image: c.image || c.img || null,
+        title: c.title || c.titulo || '',
+        text: c.text || c.desc || ''
+      });
+      const combined = [...rawA.map(normalize), ...rawB.map(normalize)];
+      const seen = new Set();
+      const unique = [];
+      combined.forEach(item => {
+        const key = item.id || (item.title + '|' + (item.image || ''));
+        if (!seen.has(key)) {
+          seen.add(key);
+          unique.push(item);
+        }
+      });
+      if (container) {
+        if (unique.length > 0) {
+          container.innerHTML = '';
+          unique.forEach(card => {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'card';
+            cardElement.innerHTML = `
+              ${card.image ? `<img src="${card.image}" alt="${card.title}" class="card-image">` : ''}
+              <h3>${card.title}</h3>
+              <div>${card.text}</div>
+            `;
+            container.appendChild(cardElement);
+          });
+        } else {
+          // Optionally, keep existing static cards if none saved
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      renderBolsos();
+    });
+
+    // Hot update when storage changes in another tab
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'savedCardsBolsos' || e.key === 'cards_bolsos') {
+        renderBolsos();
+      }
+    });
+  </script>
 
  <footer id="footer" class="footer light-background">
     <div class="container">
@@ -189,7 +219,7 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
-  <script src="MILAGRO 1/buscador.js"></script>
+  <script src="buscador.js"></script>
 
 </body>
 

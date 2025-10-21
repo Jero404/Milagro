@@ -149,27 +149,54 @@ Es un emprendimiento hecho a mano, pensado para decorar tu hogar de una manera f
     </div>
   </footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const canastas = JSON.parse(localStorage.getItem('savedCardsCanastas') || '[]');
-            const container = document.getElementById('canastasContainer');
-            
-            if (canastas.length > 0) {
-                container.innerHTML = '';
-                
-                canastas.forEach(card => {
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'card';
-                    cardElement.innerHTML = `
-                        ${card.image ? `<img src="${card.image}" alt="${card.title}" class="card-image">` : ''}
-                        <h3>${card.title}</h3>
-                        <div>${card.text}</div>
-                    `;
-                    container.appendChild(cardElement);
-                });
-            }
-        });
-    </script>
+  <script>
+    function renderCanastas() {
+      const rawA = JSON.parse(localStorage.getItem('savedCardsCanastas') || '[]');
+      const rawB = JSON.parse(localStorage.getItem('cards_canastas') || '[]');
+      const container = document.querySelector('.productos-row');
+      const normalize = (c) => ({
+        id: c.id || (c.title ? (c.title + '|' + (c.image || c.img || '')) : null),
+        image: c.image || c.img || null,
+        title: c.title || c.titulo || '',
+        text: c.text || c.desc || ''
+      });
+      const combined = [...rawA.map(normalize), ...rawB.map(normalize)];
+      const seen = new Set();
+      const unique = [];
+      combined.forEach(item => {
+        const key = item.id || (item.title + '|' + (item.image || ''));
+        if (!seen.has(key)) {
+          seen.add(key);
+          unique.push(item);
+        }
+      });
+      if (container) {
+        if (unique.length > 0) {
+          container.innerHTML = '';
+          unique.forEach(card => {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'card';
+            cardElement.innerHTML = `
+              ${card.image ? `<img src="${card.image}" alt="${card.title}" class="card-image">` : ''}
+              <h3>${card.title}</h3>
+              <div>${card.text}</div>
+            `;
+            container.appendChild(cardElement);
+          });
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      renderCanastas();
+    });
+
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'savedCardsCanastas' || e.key === 'cards_canastas') {
+        renderCanastas();
+      }
+    });
+  </script>
 
   <!-- Scroll Top -->
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
