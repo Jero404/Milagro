@@ -898,6 +898,81 @@ h6 {
   color: var(--heading-color);
 }
 
+/* Final mobile overrides for product pages: force full-width cards and touch-friendly controls */
+@media (max-width: 600px) {
+  /* Ensure productos-row stacks and uses full width */
+  .productos-row {
+    display: block !important;
+    padding: 12px !important;
+    margin: 0 auto !important;
+  }
+
+  /* Make each product card fill the available width and remove fixed widths */
+  .productos-row .card,
+  .productos-row > .card,
+  .card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 14px !important;
+    margin-bottom: 12px !important;
+    border-radius: 12px !important;
+    text-align: left !important;
+  }
+
+  /* Images should be fluid and maintain aspect ratio */
+  .productos-row .card img,
+  .card img,
+  .card-image {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 420px !important;
+    object-fit: cover !important;
+    border-radius: 8px !important;
+    display: block !important;
+    margin: 0 0 10px 0 !important;
+  }
+
+  /* Headings and paragraphs: slightly larger for readability on phones */
+  .productos-row .card h3,
+  .card h3 {
+    font-size: 1.05rem !important;
+    margin: 6px 0 !important;
+  }
+  .productos-row .card p,
+  .card p {
+    font-size: 0.95rem !important;
+    line-height: 1.45 !important;
+    margin: 6px 0 !important;
+  }
+
+  /* Buttons: full width and easy to tap */
+  .boton,
+  .productos-row .card button,
+  button {
+    width: 100% !important;
+    padding: 12px 14px !important;
+    font-size: 16px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Hide absolute-positioned logo in header and keep a smaller centered logo */
+  .logo-img {
+    position: relative !important;
+    display: block !important;
+    margin: 0 auto 12px auto !important;
+    width: 140px !important;
+    height: auto !important;
+  }
+
+  /* Reduce large paddings sitewide that break mobile layout */
+  .controls, .cards-container, .productos-row .card, section, .section {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
 .scrolled .header {
   box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1);
 }
