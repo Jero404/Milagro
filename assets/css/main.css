@@ -252,6 +252,119 @@ button {
   margin-bottom: 16px;
 }
 
+/* =============================
+   Mobile / Responsive Improvements
+   Applied at end of file so project-specific values override earlier rules.
+   Targets phones up to 600px wide (common small devices) and adds
+   intermediate rules for tablets up to 900px.
+   ============================= */
+
+/* Base adjustments for small devices */
+@media (max-width: 600px) {
+  :root {
+    --card-padding: 12px;
+    --card-radius: 12px;
+    --font-base: 16px;
+  }
+
+  html, body {
+    font-size: 16px;
+  }
+
+  /* Header spacing */
+  header.header {
+    padding: 10px 12px;
+  }
+  .logo-img {
+    max-height: 44px;
+    width: auto;
+  }
+
+  /* Stack productos-row as a single column and make cards full width */
+  .productos-row {
+    gap: 16px;
+    padding: 12px;
+  }
+  .productos-row .card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: auto !important;
+    padding: var(--card-padding);
+    border-radius: var(--card-radius);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    display: block;
+    text-align: left;
+  }
+
+  .productos-row .card img,
+  .card-image {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 360px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  /* Ensure tappable buttons are larger and full width */
+  .boton, button {
+    display: inline-block;
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  /* Card content spacing */
+  .card-content, .card p, .card h3 {
+    padding: 6px 0;
+  }
+
+  /* Footer spacing */
+  footer.footer .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* Search bar full width */
+  .buscador-input {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Reduce margins of large images used elsewhere */
+  .swiper-img-fixed {
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+  }
+}
+
+/* Intermediate: tablets and small laptops */
+@media (min-width: 601px) and (max-width: 900px) {
+  .productos-row .card {
+    max-width: 92vw;
+    padding: 16px;
+  }
+  .card-image {
+    height: 300px;
+  }
+  .boton {
+    width: auto;
+    padding: 10px 14px;
+  }
+}
+
+/* Accessibility tweaks: ensure focus outlines and larger hit targets */
+button:focus, .boton:focus, .file-input-label:focus {
+  outline: 3px solid rgba(52,152,219,0.25);
+  outline-offset: 2px;
+}
+
+/* Small utility helpers for layout consistency on mobile */
+.mx-2-mobile { margin-left: 0.5rem; margin-right: 0.5rem; }
+.py-1-mobile { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
 @media (max-width: 900px) {
   .productos-row {
     flex-direction: column;
